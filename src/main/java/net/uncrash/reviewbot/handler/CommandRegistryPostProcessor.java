@@ -10,6 +10,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import java.lang.annotation.Annotation;
+import java.util.Arrays;
+import java.util.Map;
 
 /**
  * @author Sendya
@@ -24,35 +26,20 @@ public class CommandRegistryPostProcessor implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        String[] arr = applicationContext.getBeanNamesForAnnotation(BotCommand.class);
-        if (arr.length > 0) {
-            for (String beanName : arr) {
-                Class<?> clazz = applicationContext.getType(beanName);
-                if (clazz == null || !Command.class.isAssignableFrom(clazz)) {
-                    continue;
-                }
+        Map<String, Object> commandsBean = applicationContext.getBeansWithAnnotation(BotCommand.class);
+        commandsBean.values().stream()
+                .filter(command -> Command.class.isAssignableFrom(command.getClass()))
+                .forEach(command -> {
+                    BotCommand[] botCommands = command.getClass().getAnnotationsByType(BotCommand.class);
+                    if (botCommands.length > 0) {
+                        BotCommand botCommand = botCommands[0];
 
-                Command command = (Command) applicationContext.getBean(clazz);
-                Annotation[] annotations = clazz.getAnnotations();
-                if (annotations != null && annotations.length > 0) {
-                    for (Annotation annotation : annotations) {
-                        if (annotation instanceof BotCommand) {
-                            BotCommand botCommand = (BotCommand) annotation;
-                            if (botCommand.joinProcess()) {
-                                // TODO register join handle
-                                continue;
-                            }
-                            if (botCommand.leaveProcess()) {
-                                // TODO register leave handle
-                                continue;
-                            }
+                        if (!botCommand.joinProcess() || !botCommand.leaveProcess()) {
                             String[] commands = botCommand.command();
-                            log.debug("Bean: {}, Commands: {}", beanName, commands);
-                            commandHub.register(commands, command);
+                            log.debug("Bean: {}, Commands: {}", command.getClass().getName(), commands);
+                            commandHub.register(commands, (Command) command);
                         }
                     }
-                }
-            }
-        }
+                });
     }
 }
