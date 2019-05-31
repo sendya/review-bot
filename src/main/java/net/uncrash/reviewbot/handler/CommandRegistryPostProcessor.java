@@ -7,10 +7,9 @@ import net.uncrash.reviewbot.api.Command;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Component;
 
-import java.lang.annotation.Annotation;
-import java.util.Arrays;
 import java.util.Map;
 
 /**
@@ -30,15 +29,11 @@ public class CommandRegistryPostProcessor implements ApplicationRunner {
         commandsBean.values().stream()
                 .filter(command -> Command.class.isAssignableFrom(command.getClass()))
                 .forEach(command -> {
-                    BotCommand[] botCommands = command.getClass().getAnnotationsByType(BotCommand.class);
-                    if (botCommands.length > 0) {
-                        BotCommand botCommand = botCommands[0];
-
-                        if (!botCommand.joinProcess() || !botCommand.leaveProcess()) {
-                            String[] commands = botCommand.command();
-                            log.debug("Bean: {}, Commands: {}", command.getClass().getName(), commands);
-                            commandHub.register(commands, (Command) command);
-                        }
+                    BotCommand botCommand = AnnotationUtils.findAnnotation(command.getClass(), BotCommand.class);
+                    if (!botCommand.joinProcess() || !botCommand.leaveProcess()) {
+                        String[] commands = botCommand.command();
+                        log.debug("Bean: {}, Commands: {}", command.getClass().getName(), commands);
+                        commandHub.register(commands, (Command) command);
                     }
                 });
     }

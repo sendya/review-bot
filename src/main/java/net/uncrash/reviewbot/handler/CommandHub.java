@@ -6,6 +6,7 @@ import net.uncrash.reviewbot.api.ProcessCommand;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
@@ -46,6 +47,13 @@ public class CommandHub {
         log.debug("Execute method asynchronously {}", Thread.currentThread().getName());
         log.info("Update: {}", update);
         if (!update.hasMessage()) {
+
+            if (update.hasCallbackQuery()) {
+                CallbackQuery callbackQuery = update.getCallbackQuery();
+                log.info("CallbackQuery: {}", callbackQuery);
+                return;
+            }
+            // join, leave message
             Message message = update.getMessage();
             if (message.getNewChatMembers() != null && message.getNewChatMembers().size() > 0) {
                 // TODO exec join handle
