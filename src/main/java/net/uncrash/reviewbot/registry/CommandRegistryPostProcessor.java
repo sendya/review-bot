@@ -1,4 +1,4 @@
-package net.uncrash.reviewbot.handler;
+package net.uncrash.reviewbot.registry;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +24,7 @@ public class CommandRegistryPostProcessor implements ApplicationRunner {
     private final ApplicationContext applicationContext;
 
     @Override
-    public void run(ApplicationArguments args) throws Exception {
+    public void run(ApplicationArguments args) {
         Map<String, Object> commandsBean = applicationContext.getBeansWithAnnotation(BotCommand.class);
         commandsBean.values().stream()
                 .filter(command -> Command.class.isAssignableFrom(command.getClass()))

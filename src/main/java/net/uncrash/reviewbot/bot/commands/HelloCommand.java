@@ -19,9 +19,8 @@ import java.util.List;
 public class HelloCommand implements Command {
 
     @Override
-    public boolean accept(Update update, TelegramLongPollingBot bot) {
+    public boolean accept(Message message, Update update, TelegramLongPollingBot bot) {
 
-        Message message = update.getMessage();
         try {
 
             SendMessage sendMessage = new SendMessage();
