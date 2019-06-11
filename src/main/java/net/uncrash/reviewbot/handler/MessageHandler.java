@@ -29,10 +29,10 @@ public class MessageHandler implements UpdateHandler<Message> {
             if (arr.length > 0) {
                 String commandKey = arr[0].trim();
                 String[] k = commandKey.split(" ");
-                log.debug("command key: {}, k： {}", commandKey, k);
+                log.info("command key: {}, k： {}", commandKey, k);
                 Command command = commandHub.getCommands().get(k[0]);
                 if (command == null) {
-                    log.info("command not found.");
+                    log.warn("command not found.");
                     return;
                 }
                 command.accept(message, update, bot);
